@@ -12,6 +12,5 @@ func main() {
 
 	router := gin.Default()
 	router.POST("/webhook/agent_allocation", controller.WebhookHandler(config.DB))
-
 	router.Run(":8080")
 }

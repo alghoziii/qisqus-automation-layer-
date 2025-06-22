@@ -29,7 +29,7 @@ func InitDB() {
 	}
 
 	DB = db
-	fmt.Println("✅ Connected to database")
+	fmt.Println("Connected to database")
 
 	db.AutoMigrate(&model.Customer{}, &model.Queue{})
 }
