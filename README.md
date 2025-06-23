@@ -25,10 +25,8 @@ Custom agent allocation system for Qiscus Omnichannel platform, built to automat
 ## 📬 Webhook Custom Agent Allocation
 `https://qiscus-app-production.up.railway.app/webhook/agent_allocation`
 
-## Setup Docker
-- ✅ docker build -t ozzyyyy/qiscus-app:latest .
-- ✅ docker push ozzyyyy/qiscus-app:latest   
 
+## 💻 How to Run the Project Locally
 
 
 ## Clone Repositori
@@ -38,4 +36,9 @@ Custom agent allocation system for Qiscus Omnichannel platform, built to automat
 ## Install Dependency Go dan jalankan Aplikasi
 - ✅ go mod tidy
 - ✅ go run cmd/main.go
+
+## Setup Docker
+- ✅ docker build -t ozzyyyy/qiscus-app:latest .
+- ✅ docker push ozzyyyy/qiscus-app:latest   
+
 
