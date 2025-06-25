@@ -33,7 +33,7 @@ Custom agent allocation system for Qiscus Omnichannel platform, built to automat
 
 body json
 `{
-  "room_id": "328386524"
+  "room_id": "{{room_id}}"
 }
 `
 
