@@ -12,17 +12,19 @@ import (
 	"gorm.io/gorm"
 )
 
-type WebhookPayload struct {
-	AppID     string `json:"app_id"`
-	Source    string `json:"source"`
-	Name      string `json:"name" binding:"required"`
-	Email     string `json:"email" binding:"required,email"`
-	RoomID    string `json:"room_id" binding:"required"`
+type FullWebhookPayload struct {
+	AppID      string `json:"app_id"`
+	Source     string `json:"source"`
+	Name       string `json:"name"`
+	Email      string `json:"email"`
+	RoomID     string `json:"room_id"`
+	IsResolved bool   `json:"is_resolved"`
 }
+
 
 func WebhookHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var payload WebhookPayload
+		var payload FullWebhookPayload
 		if err := c.ShouldBindJSON(&payload); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
 			return
@@ -30,6 +32,25 @@ func WebhookHandler(db *gorm.DB) gin.HandlerFunc {
 
 		secretKey := os.Getenv("QISCUS_SECRET_KEY")
 		appID := os.Getenv("QISCUS_APP_ID")
+
+		if payload.IsResolved {
+			
+			// Update database lokal
+			if err := db.Model(&model.Queue{}).Where("room_id = ?", payload.RoomID).Update("is_resolved", true).Error; err != nil {
+				log.Println("Gagal update queue:", err)
+			}
+			if err := db.Model(&model.Customer{}).Where("room_id = ?", payload.RoomID).Update("status", "resolved").Error; err != nil {
+				log.Println("Gagal update customer:", err)
+			}
+
+			// Jalankan pemrosesan antrean berikutnya
+			go utils.ProcessQueue(db)
+
+			c.JSON(http.StatusOK, gin.H{"message": "Room marked as resolved and queue processed"})
+			return
+		}
+
+		// === Jika bukan resolved, berarti ini request awal masuk ===
 
 		// Validasi room ID
 		valid, err := utils.ValidateRoomID(payload.RoomID, secretKey, appID)
@@ -61,14 +82,12 @@ func WebhookHandler(db *gorm.DB) gin.HandlerFunc {
 		// Cari agent yang tersedia
 		agents, err := utils.GetAvailableAgents(secretKey, appID, 2, db)
 		if err != nil {
-			log.Println("Gagal ambil agent:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch agents"})
 			return
 		}
 
 		// Jika tidak ada agent tersedia
 		if len(agents) == 0 {
-			log.Println("Tidak ada agent tersedia.")
 			db.Create(&model.Queue{
 				CustomerID: customer.ID,
 				RoomID:     payload.RoomID,
@@ -80,13 +99,16 @@ func WebhookHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		
+
 		// Assign agent
 		assignedAgent := agents[0]
 		if err := utils.AssignAgentToRoom(payload.RoomID, assignedAgent.ID, secretKey, appID); err != nil {
-			log.Println("Gagal assign agent:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "assign failed", "detail": err.Error()})
 			return
 		}
+
+		
 
 		// Simpan ke queue jika berhasil assign
 		db.Create(&model.Queue{
@@ -102,3 +124,7 @@ func WebhookHandler(db *gorm.DB) gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{"message": "Agent assigned", "agent": assignedAgent.Name})
 	}
 }
+
+
+
+

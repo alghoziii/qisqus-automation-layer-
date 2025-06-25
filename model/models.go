@@ -17,6 +17,7 @@ type Queue struct {
 	RoomID     string    `gorm:"not null"`
 	Assigned   bool      `gorm:"default:false"`
 	AgentID    int64     `gorm:"default:0"`
+	IsResolved bool      `gorm:"default:false"`
 	Customer   Customer  `gorm:"foreignKey:CustomerID"` 
 	CreatedAt  time.Time
 }
