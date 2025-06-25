@@ -25,9 +25,15 @@ Custom agent allocation system for Qiscus Omnichannel platform, built to automat
 ## 📬 Webhook Custom Agent Allocation
 `https://qiscus-app-production.up.railway.app/webhook/agent_allocation`
 
+## 🗝️ Testing Mark As Resolved LocalPostman
+
+`https://qiscus-app-production.up.railway.app/resolve`
+`{
+  "room_id": "328386524"
+}
+`
 
 ## 💻 How to Run the Project Locally
-
 
 ## Clone Repositori
 - ✅ git@github.com:alghoziii/qisqus-automation-layer-.git
