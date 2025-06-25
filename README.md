@@ -28,6 +28,7 @@ Custom agent allocation system for Qiscus Omnichannel platform, built to automat
 ## 🗝️ Testing Mark As Resolved LocalPostman
 
 `https://qiscus-app-production.up.railway.app/resolve`
+body json
 `{
   "room_id": "328386524"
 }
